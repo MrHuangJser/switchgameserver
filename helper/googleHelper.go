@@ -17,13 +17,13 @@ import (
 )
 
 type FileIndex struct {
-	Size int    `json:size`
-	Url  string `json:url`
+	Size int    `json:"size"`
+	Url  string `json:"url"`
 }
 
 type FilesIndex struct {
-	Files   []FileIndex `json:files`
-	Success string      `json:success`
+	Files   []FileIndex `json:"files"`
+	Success string      `json:"success"`
 }
 
 var driveService *drive.Service = nil
@@ -140,7 +140,7 @@ func genFilesIndex() error {
 	return nil
 }
 
-func GetFilesIndex() ([]byte, error) {
+func GetFilesIndex() error {
 	fileStat, err := os.Stat("./hbg.json")
 	if err == nil || os.IsExist(err) {
 		modTime := fileStat.ModTime().Unix()
@@ -153,8 +153,8 @@ func GetFilesIndex() ([]byte, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return ioutil.ReadFile("./hbg.json")
+	return nil
 }

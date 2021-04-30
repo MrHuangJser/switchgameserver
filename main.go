@@ -1,20 +1,16 @@
 package main
 
 import (
-	"bytes"
-	"compress/flate"
-	"compress/gzip"
-	"crypto/subtle"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/MrHuangJser/switchgameserver/helper"
 )
 
 var port = flag.String("port", "3001", "server port")
-var userName = flag.String("u", "123", "user name")
-var password = flag.String("p", "123", "password")
 
 func main() {
 	flag.Parse()
@@ -25,27 +21,21 @@ func main() {
 }
 
 func serverHandler(resWriter http.ResponseWriter, req *http.Request) {
-	user, passwd, ok := req.BasicAuth()
-
-	if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(*userName)) != 1 || subtle.ConstantTimeCompare([]byte(passwd), []byte(*password)) != 1 {
-		resWriter.Header().Set("WWW-Authenticate", `Basic realm="error"`)
-		resWriter.WriteHeader(401)
-		resWriter.Write([]byte("Unauthorised.\n"))
+	err := helper.GetFilesIndex()
+	if err != nil {
+		resWriter.Write([]byte(err.Error()))
 	} else {
-		content, err := helper.GetFilesIndex()
 		if err != nil {
+			resWriter.WriteHeader(500)
 			resWriter.Write([]byte(err.Error()))
 		} else {
+			f, err := os.Open("./hbg.json")
+			defer f.Close()
 			if err != nil {
 				resWriter.WriteHeader(500)
 				resWriter.Write([]byte(err.Error()))
 			} else {
-				resWriter.Header().Set("Content-Type", "application/json")
-				resWriter.Header().Set("Content-Encoding", "gzip")
-				var zipBuffer bytes.Buffer
-				gzipWriter, _ := gzip.NewWriterLevel(&zipBuffer, flate.BestCompression)
-				gzipWriter.Write(content)
-				resWriter.Write(zipBuffer.Bytes())
+				io.Copy(resWriter, f)
 			}
 		}
 	}
