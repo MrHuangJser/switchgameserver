@@ -10,8 +10,8 @@ import (
 )
 
 var port = flag.String("port", "3001", "server port")
-var userName = flag.String("u", "MrHuangJser", "user name")
-var password = flag.String("p", "FuckYou123.", "password")
+var userName = flag.String("u", "123", "user name")
+var password = flag.String("p", "123", "password")
 
 func main() {
 	flag.Parse()
