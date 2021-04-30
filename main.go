@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"compress/flate"
+	"compress/gzip"
 	"crypto/subtle"
 	"flag"
 	"fmt"
@@ -37,7 +40,12 @@ func serverHandler(resWriter http.ResponseWriter, req *http.Request) {
 				resWriter.WriteHeader(500)
 				resWriter.Write([]byte(err.Error()))
 			} else {
-				resWriter.Write(content)
+				resWriter.Header().Set("Content-Type", "application/json")
+				resWriter.Header().Set("Content-Encoding", "gzip")
+				var zipBuffer bytes.Buffer
+				gzipWriter, _ := gzip.NewWriterLevel(&zipBuffer, flate.BestCompression)
+				gzipWriter.Write(content)
+				resWriter.Write(zipBuffer.Bytes())
 			}
 		}
 	}
