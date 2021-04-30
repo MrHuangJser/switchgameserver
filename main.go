@@ -16,7 +16,7 @@ var password = flag.String("p", "FuckYou123.", "password")
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", serverHandler)
-	fmt.Println("Server initialized at 3003")
+	fmt.Printf("Server initialized at %v", *port)
 	var error = http.ListenAndServe(fmt.Sprintf(":%v", *port), nil)
 	fmt.Printf("%v", error.Error())
 }
